@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>传讯 · jxj v5.20</title>
+    <title>传讯 · jxj v5.21</title>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E4%BC%A0%E8%AE%AF%20%C2%B7%20jxj%20v5.13%22%2C%22short_name%22%3A%22jxj%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f5f3f0%22%2C%22theme_color%22%3A%22%23c5a47e%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2M1YTQ3ZSIvPjx0ZXh0IHg9IjUwIiB5PSI2NSIgZm9udC1zaXplPSI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPkogPC90ZXh0Pjwvc3ZnPg%3D%3D%22%2C%22sizes%22%3A%22100x100%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
     /* 图标按钮通用样式 */
     .icon-btn {
@@ -438,7 +438,7 @@ input[type="range"]::-moz-range-thumb {
 <body>
 <div id="chatsPage" class="page active">
     <div style="height:54px;background:var(--secondary-bg);display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--border-light);">
-        <span style="font-size:20px;font-weight:600;color:var(--theme);">传讯 v5.20</span>
+        <span style="font-size:20px;font-weight:600;color:var(--theme);">传讯 v5.21</span>
         <span id="globalAddBtn" style="cursor:pointer;color:var(--theme);display:flex;align-items:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
     </div>
     <div class="chat-list" id="chatListContainer"></div>
@@ -1821,7 +1821,7 @@ function renderChatList(){
         }
         const hasUnread = unreadReplies.length > 0 && !isHidden;
         const replyBadge = hasUnread ? '<span class="reply-badge show">📬</span>' : '<span class="reply-badge"></span>';
-        let unreadBadgeHtml = '';
+            let unreadBadgeHtml = '';
         if (it.id !== 'me' && !it.members) {
           // 全局开关关闭时，所有角标都不显示
           if (appData.globalUnreadBadgeEnabled !== false) {
@@ -1836,7 +1836,7 @@ function renderChatList(){
         }
         return `<div class="chat-item" data-id="${it.id}" style="position:relative;">
             <div class="avatar" data-userid="${it.id}">
-                ${it.avt ? `<img src="${it.avt}" onerror="this.parentElement.innerHTML='<svg width=\\"28\\" height=\\"28\\" viewBox=\\"0 0 24 24\\" fill=\\"none\\" stroke=\\"currentColor\\" stroke-width=\\"2\\"><circle cx=\\"12\\" cy=\\"7\\" r=\\"4\\"/><path d=\\"M5.5 21c0-4.5 3-7 6.5-7s6.5 2.5 6.5 7\\"/></svg>'">` : (it.members ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="17" cy="7" r="3"/><path d="M23 21v-2a3 3 0 0 0-3-3h-1"/></svg>' : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21c0-4.5 3-7 6.5-7s6.5 2.5 6.5 7"/></svg>')}
+                ${it.avt ? `<img src="${it.avt}" onerror="this.style.display='none';this.nextElementSibling.style.display='';"><span style="display:none;">${it.name[0]}</span>` : (it.members ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="17" cy="7" r="3"/><path d="M23 21v-2a3 3 0 0 0-3-3h-1"/></svg>' : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21c0-4.5 3-7 6.5-7s6.5 2.5 6.5 7"/></svg>')}
             </div>
             <div class="info">
                 <div class="name">${escapeHtml(it.name)}${it.members?` (${it.members.length})`:''}</div>
@@ -1846,7 +1846,7 @@ function renderChatList(){
             ${unreadBadgeHtml}
             <div class="swipe-bg">隐藏</div>
         </div>`;
-    }).join('')||'<div style="padding:30px;text-align:center">暂无聊天</div>';
+        }).join('') || '<div style="padding:30px;text-align:center">暂无聊天</div>';
     c.innerHTML=items;
     c.querySelectorAll('.chat-item').forEach(el=>{
         const avatarEl = el.querySelector('.avatar');
