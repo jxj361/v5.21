@@ -447,6 +447,12 @@ input[type="range"]::-moz-range-thumb {
     background-blend-mode: multiply;
     border: 1px solid var(--bubble-recv-border);
 }
+   /* 音乐、备份悬浮球和通话悬浮球样式完全一致 */
+#musicFloatBall, #backupFloatBall {
+    background: var(--theme);
+    color: #fff;
+}
+}
    </style>
 </head>
 <body>
@@ -1765,7 +1771,15 @@ function showContextMenu(x, y, msg, element) {
     if (menu.children.length) { menu.style.display = 'block'; menu.style.left = Math.min(x, window.innerWidth-150) + 'px'; menu.style.top = Math.min(y, window.innerHeight-100) + 'px'; const hide = () => { menu.style.display = 'none'; document.removeEventListener('click', hide); }; setTimeout(() => document.addEventListener('click', hide), 0); } 
 }
 function renderQuotePreview(){ const container = document.getElementById('quotePreviewContainer'); container.innerHTML = ''; if(currentQuote){ const q = document.createElement('div'); q.className = 'quote-preview'; const quotedContact = currentQuote.senderId ? getContact(currentQuote.senderId) : null; const quotedName = quotedContact ? quotedContact.name : (currentQuote.senderName || '好友'); q.innerHTML = `<span>${quotedName}: ${currentQuote.text||'[图片]'}</span><span class="quote-remove">✕</span>`; q.querySelector('.quote-remove').onclick = () => { currentQuote = null; document.getElementById('messageInput').innerHTML = ''; document.getElementById('messageInput').placeholder = '输入消息...'; renderQuotePreview(); }; container.appendChild(q); } }
-function renderMessages(){ const c=document.getElementById('chatMessages'); while(c.firstChild) c.removeChild(c.firstChild); (appData.msg[currentChatId]||[]).forEach(m=>appendMessageToChat(m)); ensureChatOverlay(); c.scrollTop = c.scrollHeight; }
+function renderMessages() {
+  const c = document.getElementById('chatMessages');
+  while (c.firstChild) c.removeChild(c.firstChild);
+  (appData.msg[currentChatId] || []).forEach(m => appendMessageToChat(m));
+  ensureChatOverlay();
+  c.scrollTop = c.scrollHeight;
+  // 二次保险：等图片和语音渲染完再滚一次
+  setTimeout(() => { c.scrollTop = c.scrollHeight; }, 150);
+}
 
 function renderEmojiPanel(){ 
     const p=document.getElementById('emojiPanel'); while(p.firstChild) p.removeChild(p.firstChild); 
@@ -2570,7 +2584,13 @@ container.appendChild(limitEmojiBtn);
 
 const resetBtn = document.createElement('button'); resetBtn.className = 'btn reset-btn-red'; resetBtn.style.cssText='width:90%;margin:2px auto;display:flex;align-items:center;text-align:left;color:#f44336';
 resetBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;flex-shrink:0;">${getIconSVG('trash-2')}</svg>重置数据`;
-resetBtn.onclick = () => { showConfirm('重置所有数据？', ()=>{ indexedDB.deleteDatabase(DB_NAME); appData = { globalCardGroups: JSON.parse(JSON.stringify(DEFAULT_CARDS)), globalRule: { min:30, max:60, cntMin:3, cntMax:5, combineMin: 1, combineMax: 3 }, myProfile: { id:'me', name:'我', avt:'', signature:'', status:'在线' }, users: [], groups: [], userEmo: {}, userImages: {}, globalEmojis: [], msg: {}, moments: {}, letters: {}, letterDrafts: {}, momentsBg: '', hiddenGlobalEmojis: {}, userDailyCommentCount: {}, disabledGlobalCards: [], disabledUserCards: {}, quoteHistory: {}, blockedKeywords: [], userBgs: {}, momentsBgs: {}, lastUserMsgTime: {}, userSoundSettings: {}, autoBackupEnabled: true, autoBackupIntervalSecs: 60, soundVolume: 0.5, dataChanged: false, lastBackupTime: Date.now(), hiddenChats: [], musicPlaylists: [{ name: "默认歌单", songs: [] }], bookLists: [{ name: "默认书单", books: [] }], movieLists: [{ name: "默认电影列表", movies: [] }], companionTasks: [], tarotCards: { tarot: [...BUILTIN_TAROT], lenormand: [...BUILTIN_LENORMAND] }, userVoices: {}, unreadBadgeSettings: {} }; appData.users.push({id:'u1',name:'梦角1',avt:'',bg:'',status:'在线',cardGroups:[{name:'未分组',list:[]}],rule:{min:30,max:60,cntMin:3,cntMax:5},noReply:false,noDisturb:true,allowInitiative:true,soundEnabled:true,replyTime:86400,muted:false},{id:'u2',name:'梦角2',avt:'',bg:'',status:'忙碌',cardGroups:[{name:'未分组',list:[]}],rule:{min:30,max:60,cntMin:3,cntMax:5},noReply:false,noDisturb:true,allowInitiative:true,soundEnabled:true,replyTime:86400,muted:false}); save(); currentChatId = null; currentMomentUserId = 'me'; selectedCards.clear(); letterUndoStack = []; letterRedoStack = []; draftUndoStacks = {}; draftRedoStacks = {}; document.getElementById('chatsPage').classList.add('active'); document.getElementById('chatPage').classList.remove('active'); document.getElementById('contactsPage').classList.remove('active'); document.getElementById('contactDetailPage').classList.remove('active'); document.getElementById('discoverPage').classList.remove('active'); document.getElementById('momentsPage').classList.remove('active'); document.getElementById('mePage').classList.remove('active'); document.getElementById('mailboxPage').classList.remove('active'); document.getElementById('letterPage').classList.remove('active'); document.getElementById('globalMask').classList.remove('show'); renderChatList(); renderContactList(); toast('数据已重置'); }); };
+resetBtn.onclick = () => { showConfirm('重置所有数据？', ()=>{ indexedDB.deleteDatabase(DB_NAME); appData = { globalCardGroups: JSON.parse(JSON.stringify(DEFAULT_CARDS)), globalRule: { min:30, max:60, cntMin:3, cntMax:5, combineMin: 1, combineMax: 3 }, myProfile: { id:'me', name:'我', avt:'', signature:'', status:'在线' }, users: [], groups: [], userEmo: {}, userImages: {}, globalEmojis: [], msg: {}, moments: {}, letters: {}, letterDrafts: {}, momentsBg: '', hiddenGlobalEmojis: {}, userDailyCommentCount: {}, disabledGlobalCards: [], disabledUserCards: {}, quoteHistory: {}, blockedKeywords: [], userBgs: {}, momentsBgs: {}, lastUserMsgTime: {}, userSoundSettings: {}, autoBackupEnabled: true, autoBackupIntervalSecs: 60, soundVolume: 0.5, dataChanged: false, lastBackupTime: Date.now(), hiddenChats: [], musicPlaylists: [{ name: "默认歌单", songs: [] }], bookLists: [{ name: "默认书单", books: [] }], movieLists: [{ name: "默认电影列表", movies: [] }], companionTasks: [], tarotCards: { tarot: [...BUILTIN_TAROT], lenormand: [...BUILTIN_LENORMAND] }, userVoices: {}, unreadBadgeSettings: {}, themeColor: '#c5a47e' }; appData.users.push({id:'u1',name:'梦角1',avt:'',bg:'',status:'在线',cardGroups:[{name:'未分组',list:[]}],rule:{min:30,max:60,cntMin:3,cntMax:5},noReply:false,noDisturb:true,allowInitiative:true,soundEnabled:true,replyTime:86400,muted:false},{id:'u2',name:'梦角2',avt:'',bg:'',status:'忙碌',cardGroups:[{name:'未分组',list:[]}],rule:{min:30,max:60,cntMin:3,cntMax:5},noReply:false,noDisturb:true,allowInitiative:true,soundEnabled:true,replyTime:86400,muted:false}); save(); 
+
+// 清除主题色备份并应用默认主题
+try { localStorage.removeItem('jxj_theme_backup'); } catch(e) {}
+applyTheme('#c5a47e');
+
+currentChatId = null; currentMomentUserId = 'me'; selectedCards.clear(); letterUndoStack = []; letterRedoStack = []; draftUndoStacks = {}; draftRedoStacks = {}; document.getElementById('chatsPage').classList.add('active'); document.getElementById('chatPage').classList.remove('active'); document.getElementById('contactsPage').classList.remove('active'); document.getElementById('contactDetailPage').classList.remove('active'); document.getElementById('discoverPage').classList.remove('active'); document.getElementById('momentsPage').classList.remove('active'); document.getElementById('mePage').classList.remove('active'); document.getElementById('mailboxPage').classList.remove('active'); document.getElementById('letterPage').classList.remove('active'); document.getElementById('globalMask').classList.remove('show'); renderChatList(); renderContactList(); toast('数据已重置'); }); };
 container.appendChild(resetBtn);
 }
 // 联系人单独导出
@@ -3581,6 +3601,8 @@ function applyTheme(hex) {
   appData.themeColor = hex;
   markDataChanged();
   save();
+  // 额外同步写入 localStorage，防止闪退丢失主题色
+  try { localStorage.setItem('jxj_theme_backup', hex); } catch (e) {}
 }
 
 // ========== 音效 ==========
@@ -5095,6 +5117,13 @@ moreBtn.style.cssText = 'font-size:16px;padding:2px 6px;display:inline-flex;alig
 moreBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">${getIconSVG('more-vertical')}</svg>`;
 moreBtn.onclick = (e) => {
     e.stopPropagation();
+    // 如果菜单已经存在，关闭它
+    const existingMenu = moreBtn.parentElement.querySelector('.music-actions-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+        return;
+    }
+    // 关闭其他已打开的菜单
     document.querySelectorAll('.music-actions-menu').forEach(m => m.remove());
     const menu = document.createElement('div');
     menu.className = 'music-actions-menu';
@@ -5122,6 +5151,7 @@ moreBtn.onclick = (e) => {
     menu.appendChild(shareItem);
     menu.appendChild(deleteItem);
     moreBtn.parentElement.appendChild(menu);
+
     
     const closeHandler = (ev) => {
         if (!menu.contains(ev.target) && ev.target !== moreBtn) {
@@ -5709,11 +5739,15 @@ if (!collapseRow) {
         bar.style.display = 'flex'; if(currentLeft) { bar.style.left = currentLeft; bar.style.top = currentTop; bar.style.right = 'auto'; bar.style.bottom = 'auto'; }
         const song = musicCurrentSongIndex >= 0 ? songs[musicCurrentSongIndex] : null;
         bar.innerHTML = '';
-        const prevBtn2 = document.createElement('button'); prevBtn2.textContent='⏮'; prevBtn2.onclick = (e) => { e.stopPropagation(); musicPrev(); };
-        const playBtn2 = document.createElement('button'); playBtn2.textContent=musicIsPlaying?'⏸':'▶️'; playBtn2.onclick = (e) => { e.stopPropagation(); musicTogglePlay(); };
-        const nextBtn2 = document.createElement('button'); nextBtn2.textContent='⏭'; nextBtn2.onclick = (e) => { e.stopPropagation(); musicNext(); };
-        const infoDiv2 = document.createElement('div'); infoDiv2.className='bar-info'; infoDiv2.textContent = song ? `${song.title} - ${song.sub}` : '未播放'; infoDiv2.onclick = (e) => { e.stopPropagation(); currentMusicFloatState = 'list'; updateMusicFloatUI(); };
-        const closeBtn2 = document.createElement('button'); closeBtn2.textContent='✕'; closeBtn2.onclick = (e) => { e.stopPropagation(); showConfirm('关闭悬浮窗？', () => { stopMusic(); currentMusicFloatState = 'ball'; updateMusicFloatUI(); }); };
+        const prevBtn2 = document.createElement('button'); prevBtn2.style.cssText='background:none;border:none;cursor:pointer;padding:2px;color:var(--theme);display:flex;align-items:center;'; prevBtn2.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('skip-back')}</svg>`; prevBtn2.onclick = (e) => { e.stopPropagation(); musicPrev(); };
+
+const playBtn2 = document.createElement('button'); playBtn2.style.cssText='background:none;border:none;cursor:pointer;padding:2px;color:var(--theme);display:flex;align-items:center;'; playBtn2.innerHTML = musicIsPlaying ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('pause')}</svg>` : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('play')}</svg>`; playBtn2.onclick = (e) => { e.stopPropagation(); musicTogglePlay(); };
+
+const nextBtn2 = document.createElement('button'); nextBtn2.style.cssText='background:none;border:none;cursor:pointer;padding:2px;color:var(--theme);display:flex;align-items:center;'; nextBtn2.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('skip-forward')}</svg>`; nextBtn2.onclick = (e) => { e.stopPropagation(); musicNext(); };
+
+const infoDiv2 = document.createElement('div'); infoDiv2.className='bar-info'; infoDiv2.textContent = song ? `${song.title} - ${song.sub}` : '未播放'; infoDiv2.onclick = (e) => { e.stopPropagation(); currentMusicFloatState = 'list'; updateMusicFloatUI(); };
+
+const closeBtn2 = document.createElement('button'); closeBtn2.style.cssText='background:none;border:none;cursor:pointer;padding:2px;color:var(--theme);display:flex;align-items:center;'; closeBtn2.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('x')}</svg>`; closeBtn2.onclick = (e) => { e.stopPropagation(); showConfirm('关闭悬浮窗？', () => { stopMusic(); currentMusicFloatState = 'ball'; updateMusicFloatUI(); }); };
         bar.appendChild(prevBtn2); bar.appendChild(playBtn2); bar.appendChild(nextBtn2); bar.appendChild(infoDiv2); bar.appendChild(closeBtn2);
     }
 }
@@ -5761,6 +5795,13 @@ moreBtn.style.cssText = 'font-size:14px;padding:1px 4px;display:inline-flex;alig
 moreBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">${getIconSVG('more-vertical')}</svg>`;
 moreBtn.onclick = (e) => {
     e.stopPropagation();
+    // 如果菜单已经存在，关闭它
+    const existingMenu = moreBtn.parentElement.querySelector('.music-float-actions-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+        return;
+    }
+    // 关闭其他已打开的菜单
     document.querySelectorAll('.music-float-actions-menu').forEach(m => m.remove());
     const menu = document.createElement('div');
     menu.className = 'music-float-actions-menu';
@@ -5788,6 +5829,7 @@ moreBtn.onclick = (e) => {
     menu.appendChild(shareItem);
     menu.appendChild(deleteItem);
     moreBtn.parentElement.appendChild(menu);
+
     
     const closeHandler = (ev) => {
         if (!menu.contains(ev.target) && ev.target !== moreBtn) {
@@ -6000,34 +6042,42 @@ body.appendChild(batchRow);
         moreBtn.style.cssText = 'font-size:16px;padding:2px 6px;display:inline-flex;align-items:center;vertical-align:middle;border:none;background:transparent;cursor:pointer;';
         moreBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">${getIconSVG('more-vertical')}</svg>`;
         moreBtn.onclick = (e) => {
-            e.stopPropagation();
-            document.querySelectorAll('.book-actions-menu').forEach(m => m.remove());
-            const menu = document.createElement('div');
-            menu.className = 'book-actions-menu';
-            menu.style.cssText = 'position:absolute;right:0;top:100%;z-index:200;background:var(--secondary-bg);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:4px;display:flex;flex-direction:column;min-width:90px;';
-            
-            const moveItem = document.createElement('button');
-            moveItem.className = 'btn';
-            moveItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;';
-            moveItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('move')}</svg> 移动`;
-            moveItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); moveBookToList(realIdx); };
-            
-            const shareItem = document.createElement('button');
-            shareItem.className = 'btn';
-            shareItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;';
-            shareItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('share-2')}</svg> 分享`;
-            shareItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); shareBookToContact(book); };
-            
-            const deleteItem = document.createElement('button');
-            deleteItem.className = 'btn';
-            deleteItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;color:#f44336;';
-            deleteItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f44336" stroke-width="2">${getIconSVG('trash-2')}</svg> 删除`;
-            deleteItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); deleteBook(realIdx); };
-            
-            menu.appendChild(moveItem);
-            menu.appendChild(shareItem);
-            menu.appendChild(deleteItem);
-            moreBtn.parentElement.appendChild(menu);
+    e.stopPropagation();
+    // 如果菜单已经存在，关闭它
+    const existingMenu = moreBtn.parentElement.querySelector('.book-actions-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+        return;
+    }
+    // 关闭其他已打开的菜单
+    document.querySelectorAll('.book-actions-menu').forEach(m => m.remove());
+    const menu = document.createElement('div');
+    menu.className = 'book-actions-menu';
+    menu.style.cssText = 'position:absolute;right:0;top:100%;z-index:200;background:var(--secondary-bg);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:4px;display:flex;flex-direction:column;min-width:90px;';
+    
+    const moveItem = document.createElement('button');
+    moveItem.className = 'btn';
+    moveItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;';
+    moveItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('move')}</svg> 移动`;
+    moveItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); moveBookToList(realIdx); };
+    
+    const shareItem = document.createElement('button');
+    shareItem.className = 'btn';
+    shareItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;';
+    shareItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('share-2')}</svg> 分享`;
+    shareItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); shareBookToContact(book); };
+    
+    const deleteItem = document.createElement('button');
+    deleteItem.className = 'btn';
+    deleteItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;color:#f44336;';
+    deleteItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f44336" stroke-width="2">${getIconSVG('trash-2')}</svg> 删除`;
+    deleteItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); deleteBook(realIdx); };
+    
+    menu.appendChild(moveItem);
+    menu.appendChild(shareItem);
+    menu.appendChild(deleteItem);
+    moreBtn.parentElement.appendChild(menu);
+
             
             const closeHandler = (ev) => {
                 if (!menu.contains(ev.target) && ev.target !== moreBtn) {
@@ -6151,39 +6201,46 @@ body.appendChild(batchRow);
         moreBtn.style.cssText = 'font-size:16px;padding:2px 6px;display:inline-flex;align-items:center;vertical-align:middle;border:none;background:transparent;cursor:pointer;';
         moreBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">${getIconSVG('more-vertical')}</svg>`;
         moreBtn.onclick = (e) => {
-            e.stopPropagation();
-            // 关闭其他已打开的菜单
-            document.querySelectorAll('.movie-actions-menu').forEach(m => m.remove());
-            // 创建下拉菜单
-            const menu = document.createElement('div');
-            menu.className = 'movie-actions-menu';
-            menu.style.cssText = 'position:absolute;right:0;top:100%;z-index:200;background:var(--secondary-bg);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:4px;display:flex;flex-direction:column;min-width:90px;';
-            
-            // 移动
-            const moveItem = document.createElement('button');
-            moveItem.className = 'btn';
-            moveItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;';
-            moveItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('move')}</svg> 移动`;
-            moveItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); moveMovieToList(realIdx); };
-            
-            // 分享
-            const shareItem = document.createElement('button');
-            shareItem.className = 'btn';
-            shareItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;';
-            shareItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('share-2')}</svg> 分享`;
-            shareItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); shareMovieToContact(movie); };
-            
-            // 删除（红色）
-            const deleteItem = document.createElement('button');
-            deleteItem.className = 'btn';
-            deleteItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;color:#f44336;';
-            deleteItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f44336" stroke-width="2">${getIconSVG('trash-2')}</svg> 删除`;
-            deleteItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); deleteMovie(realIdx); };
-            
-            menu.appendChild(moveItem);
-            menu.appendChild(shareItem);
-            menu.appendChild(deleteItem);
-            moreBtn.parentElement.appendChild(menu);
+    e.stopPropagation();
+    // 如果菜单已经存在，关闭它
+    const existingMenu = moreBtn.parentElement.querySelector('.movie-actions-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+        return;
+    }
+    // 关闭其他已打开的菜单
+    document.querySelectorAll('.movie-actions-menu').forEach(m => m.remove());
+    // 创建下拉菜单
+    const menu = document.createElement('div');
+    menu.className = 'movie-actions-menu';
+    menu.style.cssText = 'position:absolute;right:0;top:100%;z-index:200;background:var(--secondary-bg);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:4px;display:flex;flex-direction:column;min-width:90px;';
+    
+    // 移动
+    const moveItem = document.createElement('button');
+    moveItem.className = 'btn';
+    moveItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;';
+    moveItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('move')}</svg> 移动`;
+    moveItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); moveMovieToList(realIdx); };
+    
+    // 分享
+    const shareItem = document.createElement('button');
+    shareItem.className = 'btn';
+    shareItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;';
+    shareItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('share-2')}</svg> 分享`;
+    shareItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); shareMovieToContact(movie); };
+    
+    // 删除（红色）
+    const deleteItem = document.createElement('button');
+    deleteItem.className = 'btn';
+    deleteItem.style.cssText = 'font-size:12px;padding:6px 10px;display:flex;align-items:center;gap:4px;border:none;background:none;cursor:pointer;color:#f44336;';
+    deleteItem.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f44336" stroke-width="2">${getIconSVG('trash-2')}</svg> 删除`;
+    deleteItem.onclick = (e2) => { e2.stopPropagation(); menu.remove(); deleteMovie(realIdx); };
+    
+    menu.appendChild(moveItem);
+    menu.appendChild(shareItem);
+    menu.appendChild(deleteItem);
+    moreBtn.parentElement.appendChild(menu);
+
             
             // 点击其他地方关闭菜单
             const closeHandler = (ev) => {
@@ -7841,45 +7898,52 @@ document.addEventListener('visibilitychange', () => {
 
     // ========== 初始化 ==========
     async function init() {
-      await load();
-    
-      // 先让页面核心结构渲染出来
-      applyTransparency();
-      renderChatList();
-      renderContactList();
-      bindEvents();
-      setActiveNav('chats');
-    
-      // 以下所有非首屏必需的任务，推迟 100ms 执行
-      setTimeout(() => {
-        simulateUserMoments();
-        simulateUserMomentComments();
-        simulateUserOwnComments();
-        simulateUserMomentLikes();
-        startAutoBackup();
-        startSaveReminder();
-        updateMusicFloatUI();
-        if (backupFloatBall) backupFloatBall.style.display = 'none';
-        if (backupFloatPanel) backupFloatPanel.style.display = 'none';
-        const activeTask = appData.companionTasks.find(t => t.status === 'active');
-        if (activeTask) {
-          currentCompanionTaskId = activeTask.id;
-          if (activeTask.type === 'movie') startMovieTogetherTimers(activeTask);
-          else startCompanionTimers(activeTask);
-        }
-        document.body.addEventListener('click', (e) => {
-          const badge = e.target.closest('.unread-badge');
-          if (badge) {
-            const chatId = badge.dataset.unread;
-            if (chatId && currentChatId !== chatId) {
-              currentChatId = chatId;
-              openChat();
-            }
-          }
-        });
-      }, 100);
+  await load();
+
+  // 优先从 localStorage 恢复主题色，防止闪退丢失
+  const savedTheme = localStorage.getItem('jxj_theme_backup');
+  if (savedTheme) {
+    appData.themeColor = savedTheme;
+  }
+  applyTheme(appData.themeColor || '#c5a47e');
+
+  // 先让页面核心结构渲染出来
+  applyTransparency();
+  renderChatList();
+  renderContactList();
+  bindEvents();
+  setActiveNav('chats');
+
+  // 以下所有非首屏必需的任务，推迟 100ms 执行
+  setTimeout(() => {
+    simulateUserMoments();
+    simulateUserMomentComments();
+    simulateUserOwnComments();
+    simulateUserMomentLikes();
+    startAutoBackup();
+    startSaveReminder();
+    updateMusicFloatUI();
+    if (backupFloatBall) backupFloatBall.style.display = 'none';
+    if (backupFloatPanel) backupFloatPanel.style.display = 'none';
+    const activeTask = appData.companionTasks.find(t => t.status === 'active');
+    if (activeTask) {
+      currentCompanionTaskId = activeTask.id;
+      if (activeTask.type === 'movie') startMovieTogetherTimers(activeTask);
+      else startCompanionTimers(activeTask);
     }
-    init();
+    document.body.addEventListener('click', (e) => {
+      const badge = e.target.closest('.unread-badge');
+      if (badge) {
+        const chatId = badge.dataset.unread;
+        if (chatId && currentChatId !== chatId) {
+          currentChatId = chatId;
+          openChat();
+        }
+      }
+    });
+  }, 100);
+}
+init();
 })();
 </script>
 
