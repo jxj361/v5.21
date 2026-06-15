@@ -433,6 +433,20 @@ input[type="range"]::-moz-range-thumb {
     color: var(--theme-dark);
     stroke: var(--theme-dark);
 }
+   /* 气泡可读性增强：白色底色 + 主题色覆盖，深色壁纸也能看清 */
+.chat-body .msg-row .msg-bubble {
+    backdrop-filter: blur(4px);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.msg-self .msg-bubble {
+    background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), var(--bubble-sent);
+    background-blend-mode: multiply;
+}
+.msg-other .msg-bubble {
+    background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), var(--bubble-recv);
+    background-blend-mode: multiply;
+    border: 1px solid var(--bubble-recv-border);
+}
    </style>
 </head>
 <body>
