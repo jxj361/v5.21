@@ -8811,6 +8811,20 @@ document.addEventListener('visibilitychange', () => {
         }
       }
     });
+
+    // 后台预热：提前把所有聊天记录加载到内存，避免打开聊天界面时卡顿
+    setTimeout(async () => {
+      try {
+        const msgData = await loadFromDB('appData_msg');
+        if (msgData) {
+          for (const chatId in msgData) {
+            if (!appData.msg[chatId]) {
+              appData.msg[chatId] = msgData[chatId];
+            }
+          }
+        }
+      } catch (e) {}
+    }, 500);
   }, 100);
 }
 init();
