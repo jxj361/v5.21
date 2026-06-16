@@ -1014,25 +1014,45 @@ window.addEventListener('beforeunload', (e) => {
 });
 
 async function load() {
-    // 1. 尝试按新格式读取：核心数据和聊天记录分开
-    let coreData = null, msgData = null;
+    // 1. 先读取核心数据，让应用快速启动
+    let coreData = null;
     try {
-        const [core, msg] = await Promise.all([
-            loadFromDB('appData_core'),
-            loadFromDB('appData_msg')
-        ]);
-        coreData = core;
-        msgData = msg;
+        coreData = await loadFromDB('appData_core');
     } catch(e) {}
 
-    // 2. 如果新格式不存在，尝试从旧格式迁移（自动做一次）
+    // 2. 尝试同步读取聊天记录（数据量小时很快）
+    let msgData = null;
+    try {
+        msgData = await loadFromDB('appData_msg');
+    } catch(e) {
+        // 数据量太大读取出错，后台异步加载
+    }
+
+    // 3. 如果聊天记录读取失败，后台异步加载
+    if (!msgData) {
+        setTimeout(async () => {
+            try {
+                const data = await loadFromDB('appData_msg');
+                if (data) {
+                    for (const chatId in data) {
+                        if (!appData.msg[chatId]) {
+                            appData.msg[chatId] = data[chatId];
+                        }
+                    }
+                }
+            } catch(e) {}
+        }, 200);
+        msgData = {};
+    }
+
+    // 4. 如果新格式不存在，尝试从旧格式迁移（自动做一次）
     if (!coreData) {
         try {
             const oldData = await loadFromDB('appData');
             if (oldData) {
                 const { msg, ...rest } = oldData;
                 coreData = rest;
-                msgData = msg;
+                msgData = msg || msgData;
                 // 迁移完成，把旧数据写入新格式
                 try { await saveToDB({ id: 'appData_core', data: coreData }); } catch(e) {}
                 try { await saveToDB({ id: 'appData_msg', data: msgData }); } catch(e) {}
@@ -1042,7 +1062,7 @@ async function load() {
         } catch(e) {}
     }
 
-    // 3. 合并数据到 appData
+    // 5. 合并数据到 appData
     if (coreData) {
         appData = { ...appData, ...coreData };
     }
@@ -1050,7 +1070,7 @@ async function load() {
         appData.msg = msgData;
     }
 
-    // 4. 如果 IndexedDB 完全没数据，从 localStorage 恢复
+    // 6. 如果 IndexedDB 完全没数据，从 localStorage 恢复
     if (!coreData) {
         const raw = localStorage.getItem('jxj_chat_final_v9');
         if (raw) {
@@ -1064,7 +1084,7 @@ async function load() {
         }
     }
 
-    // 5. 后面保持原有的字段补全逻辑不变
+    // 7. 后面保持原有的字段补全逻辑不变
     
     appData.globalCardGroups = appData.globalCardGroups || JSON.parse(JSON.stringify(DEFAULT_CARDS));
     if(!appData.globalCardGroups.some(g=>g.name==='未分组')) appData.globalCardGroups.push({name:'未分组',list:[]});
@@ -1116,6 +1136,7 @@ async function load() {
     if (!appData.companionBgs) appData.companionBgs = {};
     if (appData.companionBgSlideshow === undefined) appData.companionBgSlideshow = false;
     if (!appData.companionBgSlideshowInterval) appData.companionBgSlideshowInterval = 30;
+    if (!appData.themeColor) appData.themeColor = '#c5a47e';
     for (const uid in appData.letters) {
         (appData.letters[uid] || []).forEach(l => {
             if (l.from !== 'me' && l.read === undefined) l.read = false;
