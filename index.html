@@ -121,7 +121,22 @@
         .date-separator span { background:rgba(0,0,0,0.05); padding:2px 12px; border-radius:10px; }
         .msg-image-inline { max-width:100px; max-height:100px; border-radius:4px; margin:4px 2px; display:inline-block; object-fit:contain; vertical-align:middle; }
         .initiative-tag { font-size:10px; color:var(--theme); margin-bottom:2px; }
-        .quote-preview { font-size:12px; color:var(--text-secondary); background:rgba(0,0,0,0.05); padding:4px 8px; border-radius:8px; margin-bottom:4px; border-left:3px solid var(--theme); display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+        .quote-preview {
+          font-size: 12px;
+          color: var(--text-secondary);
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(4px);
+          padding: 4px 8px;
+          border-radius: 8px;
+          margin-bottom: 4px;
+          border-left: 3px solid var(--theme);
+          border: 1px solid var(--bubble-recv-border);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          cursor: pointer;
+        }
         .quote-preview .quote-remove { cursor:pointer; color:#f44336; font-weight:bold; margin-left:8px; }
         .input-area { border-top:1px solid var(--border-light); padding:6px 10px 8px; }
         .tools-row { display:flex; align-items:center; margin-bottom:6px; }
@@ -453,6 +468,59 @@ input[type="range"]::-moz-range-thumb {
     color: #fff;
 }
 }
+   /* 五子棋棋盘 */
+#gomokuCanvas {
+    border: 2px solid var(--theme);
+    border-radius: 8px;
+    background: var(--primary-bg);
+    touch-action: none;
+}
+.gomoku-status {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 12px 0;
+    color: var(--theme-dark);
+}
+.gomoku-reset-btn {
+    margin-top: 12px;
+    padding: 8px 20px;
+    border: 1px solid var(--theme);
+    background: var(--theme-light);
+    color: var(--theme-dark);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+   /* 发现页所有入口图标：底色浅、线条深 */
+#discoverListContainer .avatar {
+    background: var(--theme-light);
+}
+#discoverListContainer .avatar svg {
+    stroke: var(--theme-dark);
+}
+   /* 五子棋按钮 */
+.gomoku-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--theme);
+    background: var(--theme-light);
+    color: var(--theme-dark);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.gomoku-avatar {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    border: 2px solid var(--theme);
+}
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(5px); }
+    10% { opacity: 1; transform: translateY(0); }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
    </style>
 </head>
 <body>
@@ -545,6 +613,7 @@ input[type="range"]::-moz-range-thumb {
 <div class="chat-item" id="goTarotBtn"><div class="avatar" style="display:flex;align-items:center;justify-content:center;background:var(--theme-light);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--theme-dark)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="info"><div class="name">塔罗/雷诺曼</div></div></div>
 
 <div class="chat-item" id="goMovieTogetherBtn"><div class="avatar" style="display:flex;align-items:center;justify-content:center;background:var(--theme-light);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--theme-dark)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></div><div class="info"><div class="name">一起看电影</div></div></div>
+<div class="chat-item" id="goDatingBtn"><div class="avatar" style="display:flex;align-items:center;justify-content:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--theme)" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div class="info"><div class="name">约会</div></div></div>    
     </div>
     <div class="bottom-nav">
     <div class="nav-item" data-nav="chats"><i><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></i><span>传讯</span></div>
@@ -597,6 +666,25 @@ input[type="range"]::-moz-range-thumb {
 <div id="movieListPage" class="page"><div class="full-page-header"><div class="back-btn" id="movieListBackBtn">‹</div><span style="font-weight:600;font-size:18px;color:var(--theme);" id="movieListTitle">电影列表</span><span style="width:36px;"></span></div><div class="full-page-body" id="movieListPageContent"></div></div>
 <div id="tarotPage" class="page"><div class="full-page-header"><div class="back-btn" id="tarotBackBtn">‹</div><span style="font-weight:600;font-size:18px;color:var(--theme);">塔罗/雷诺曼</span><span style="width:36px;"></span></div><div class="full-page-body" id="tarotPageContent"></div></div>
 <div id="movieTogetherPage" class="page"><div class="full-page-header"><div class="back-btn" id="movieTogetherBackBtn">‹</div><span style="font-weight:600;font-size:18px;color:var(--theme);">一起看电影</span><span style="width:36px;"></span></div><div class="full-page-body" id="movieTogetherPageContent"></div></div>
+<!-- 约会列表页 -->
+<div id="datingPage" class="page">
+  <div class="full-page-header">
+    <div class="back-btn" id="datingBackBtn">‹</div>
+    <span style="font-weight:600;font-size:18px;color:var(--accent);">约会</span>
+    <span style="width:36px;"></span>
+  </div>
+  <div class="full-page-body" id="datingPageContent"></div>
+</div>
+
+<!-- 五子棋页 -->
+<div id="gomokuPage" class="page">
+  <div class="full-page-header">
+    <div class="back-btn" id="gomokuBackBtn">‹</div>
+    <span style="font-weight:600;font-size:18px;color:var(--accent);">五子棋</span>
+    <span style="width:36px;"></span>
+  </div>
+  <div class="full-page-body" id="gomokuPageContent" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;"></div>
+</div>
 <!-- 独立陪伴页面 -->
 <div id="companionActivePage" class="page">
   <div class="full-page-header">
@@ -1136,6 +1224,9 @@ function getIconSVG(name) {
     'minus': '<line x1="5" y1="12" x2="19" y2="12"/>',
   
     'copy': '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  
+    'gift': '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
+    'grid': '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/>'
   };
   return icons[name] || '';
 }
@@ -1628,7 +1719,7 @@ function appendMessageToChat(msg, scrollToMsg = false){
         a.addEventListener('dblclick', (e) => { e.stopPropagation(); if(msg.me) openMomentsPage('me', false); else if(msg.senderId && msg.senderId !== 'me') openPokePage(currentChatId, 'chat'); });
         const c=document.createElement('div');c.className='msg-content';
         if(msg.initiative){ const tag = document.createElement('div'); tag.className='initiative-tag'; tag.textContent = '✨ 主动找你'; c.appendChild(tag); }
-        if(msg.quote){ const q=document.createElement('div');q.className='quote-preview'; const quotedContact = msg.quote.senderId ? getContact(msg.quote.senderId) : null; const quotedName = quotedContact ? quotedContact.name : (msg.quote.senderName || '好友'); q.innerHTML = `<span>${quotedName}: ${msg.quote.text||'[语音]'}</span><span class="quote-remove">✕</span>`; q.querySelector('.quote-remove').onclick = (e) => { e.stopPropagation(); q.remove(); }; q.addEventListener('click', (e) => { if(e.target.classList.contains('quote-remove')) return; const time = msg.quote.msgTime; if(time){ const targetEl = document.querySelector(`.msg-row[data-msg-time="${time}"]`); if(targetEl) { targetEl.scrollIntoView({behavior:'smooth', block:'center'}); targetEl.style.backgroundColor='rgba(197,164,126,0.2)'; setTimeout(()=>targetEl.style.backgroundColor='',1500); } else toast('原消息已删除'); } }); c.appendChild(q); }
+        if(msg.quote){ const q=document.createElement('div');q.className='quote-preview'; const quotedContact = msg.quote.senderId ? getContact(msg.quote.senderId) : null; const quotedName = quotedContact ? quotedContact.name : (msg.quote.senderName || '好友'); q.innerHTML = `<span>${quotedName}: ${msg.quote.text||'[语音]'}</span>`; q.querySelector('.quote-remove').onclick = (e) => { e.stopPropagation(); q.remove(); }; q.addEventListener('click', (e) => { if(e.target.classList.contains('quote-remove')) return; const time = msg.quote.msgTime; if(time){ const targetEl = document.querySelector(`.msg-row[data-msg-time="${time}"]`); if(targetEl) { targetEl.scrollIntoView({behavior:'smooth', block:'center'}); targetEl.style.backgroundColor='rgba(197,164,126,0.2)'; setTimeout(()=>targetEl.style.backgroundColor='',1500); } else toast('原消息已删除'); } }); c.appendChild(q); }
         const voiceBubble = document.createElement('div'); voiceBubble.className='msg-bubble voice-msg-bubble';
         voiceBubble.style.cssText = 'display:flex;align-items:center;gap:8px;cursor:pointer;min-width:80px;position:relative;';
         voiceBubble.innerHTML = `<span style="display:flex;align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('volume-2')}</svg></span><span class="voice-duration-text">${msg.voiceDuration||0}″</span>`;
@@ -1660,7 +1751,7 @@ function appendMessageToChat(msg, scrollToMsg = false){
         a.addEventListener('dblclick', (e) => { e.stopPropagation(); if(msg.me) openMomentsPage('me', false); else if(msg.senderId && msg.senderId !== 'me') openPokePage(currentChatId, 'chat'); });
         const c=document.createElement('div');c.className='msg-content';
         if(msg.initiative){ const tag = document.createElement('div'); tag.className='initiative-tag'; tag.textContent = '✨ 主动找你'; c.appendChild(tag); }
-        if(msg.quote){ const q=document.createElement('div');q.className='quote-preview'; const quotedContact = msg.quote.senderId ? getContact(msg.quote.senderId) : null; const quotedName = quotedContact ? quotedContact.name : (msg.quote.senderName || '好友'); q.innerHTML = `<span>${quotedName}: ${msg.quote.text||'[图片]'}</span><span class="quote-remove">✕</span>`; q.querySelector('.quote-remove').onclick = (e) => { e.stopPropagation(); q.remove(); }; q.addEventListener('click', (e) => { if(e.target.classList.contains('quote-remove')) return; const time = msg.quote.msgTime; if(time){ const targetEl = document.querySelector(`.msg-row[data-msg-time="${time}"]`); if(targetEl) { targetEl.scrollIntoView({behavior:'smooth', block:'center'}); targetEl.style.backgroundColor='rgba(197,164,126,0.2)'; setTimeout(()=>targetEl.style.backgroundColor='',1500); } else toast('原消息已删除'); } }); c.appendChild(q); }
+        if(msg.quote){ const q=document.createElement('div');q.className='quote-preview'; const quotedContact = msg.quote.senderId ? getContact(msg.quote.senderId) : null; const quotedName = quotedContact ? quotedContact.name : (msg.quote.senderName || '好友'); q.innerHTML = `<span>${quotedName}: ${msg.quote.text||'[图片]'}</span>`;q.querySelector('.quote-remove').onclick = (e) => { e.stopPropagation(); q.remove(); }; q.addEventListener('click', (e) => { if(e.target.classList.contains('quote-remove')) return; const time = msg.quote.msgTime; if(time){ const targetEl = document.querySelector(`.msg-row[data-msg-time="${time}"]`); if(targetEl) { targetEl.scrollIntoView({behavior:'smooth', block:'center'}); targetEl.style.backgroundColor='rgba(197,164,126,0.2)'; setTimeout(()=>targetEl.style.backgroundColor='',1500); } else toast('原消息已删除'); } }); c.appendChild(q); }
         let imgSrc = msg.image;
         if (imgSrc && !imgSrc.startsWith('data:image') && !imgSrc.startsWith('blob:')) {
             loadMedia(imgSrc).then(data => { if(data) imgSrc = data; });
@@ -1756,9 +1847,9 @@ function showContextMenu(x, y, msg, element) {
     if (isFromOther && (msg.text || msg.image || msg.voice) && msg.type !== 'system') { 
         addItem('引用', () => { currentQuote = { text: msg.text || (msg.image ? '[图片]' : (msg.voice ? '[语音]' : '')), senderName: msg.senderName || getContact(msg.senderId)?.name || '好友', senderId: msg.senderId || currentChatId, msgTime: msg.time }; document.getElementById('messageInput').placeholder = `引用 ${currentQuote.senderName}`; renderQuotePreview(); toast('已引用，点击发送'); }); 
     } 
-    if (msg.senderId === 'me' || msg.me) { 
-        addItem('删除', () => { showConfirm('删除这条消息？', () => { const msgs = appData.msg[currentChatId] || []; const idx = msgs.findIndex(m => m.time === msg.time); if (idx > -1) msgs.splice(idx, 1); markDataChanged(); save(); renderMessages(); }); }); 
-    }
+    if ((msg.senderId === 'me' || msg.me) && !msg.quote) { 
+    addItem('删除', () => { showConfirm('删除这条消息？', () => { const msgs = appData.msg[currentChatId] || []; const idx = msgs.findIndex(m => m.time === msg.time); if (idx > -1) msgs.splice(idx, 1); markDataChanged(); save(); renderMessages(); }); }); 
+}
     if (msg.voice) {
         addItem('✏️ 添加备注', () => {
             showInputDialog('语音备注', msg.voiceNote || '', (val) => {
@@ -6471,7 +6562,753 @@ function renderVoiceManagerPage(userId){
     function clearMovieTogetherTimers(){ if(movieTogetherTimerInterval){ clearInterval(movieTogetherTimerInterval); movieTogetherTimerInterval = null; } if(movieTogetherInteractionInterval){ clearInterval(movieTogetherInteractionInterval); movieTogetherInteractionInterval = null; } }
     function endMovieTogetherTask(task){ clearMovieTogetherTimers(); task.status = 'completed'; markDataChanged(); save(); renderMovieTogetherPage(); toast('电影结束啦！'); }
     document.getElementById('movieTogetherBackBtn').onclick = () => { clearMovieTogetherTimers(); document.getElementById('movieTogetherPage').classList.remove('active'); switchToDiscoverTab(); };
+    
+    // ========== 约会系统 ==========
+function openDatingPage() {
+    hideAllPages();
+    document.getElementById('datingPage').classList.add('active');
+    renderDatingPage();
+}
 
+function renderDatingPage() {
+  const body = document.getElementById('datingPageContent');
+  body.innerHTML = '';
+  body.style.display = 'flex';
+  body.style.flexDirection = 'column';
+  body.style.gap = '10px';
+  body.style.padding = '12px';
+
+  // 获取所有非群聊联系人
+  const contacts = appData.users.filter(u => !u.members);
+
+  if (contacts.length === 0) {
+    body.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">请先添加好友</div>';
+    return;
+  }
+
+  if (contacts.length === 1) {
+    // 只有一个联系人，直接进入约会项目列表
+    renderDatingItemList(contacts[0].id);
+  } else {
+    // 多个联系人，先选择
+    const title = document.createElement('div');
+    title.style.cssText = 'font-size:16px;font-weight:bold;margin-bottom:8px;color:var(--text-primary);';
+    title.textContent = '选择约会对象';
+    body.appendChild(title);
+
+    contacts.forEach(contact => {
+      const item = document.createElement('div');
+      item.className = 'chat-item';
+      item.style.cssText = 'cursor:pointer;';
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      if (contact.avt) {
+        avatar.innerHTML = `<img src="${contact.avt}" style="width:100%;height:100%;object-fit:cover;">`;
+      } else {
+        avatar.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21c0-4.5 3-7 6.5-7s6.5 2.5 6.5 7"/></svg>`;
+      }
+      const info = document.createElement('div');
+      info.className = 'info';
+      info.innerHTML = `<div class="name">${contact.name}</div>`;
+      item.appendChild(avatar);
+      item.appendChild(info);
+      item.onclick = () => {
+        renderDatingItemList(contact.id);
+      };
+      body.appendChild(item);
+    });
+  }
+}
+
+// 约会项目列表（五子棋等）
+function renderDatingItemList(userId) {
+  const body = document.getElementById('datingPageContent');
+  body.innerHTML = '';
+  body.style.display = 'flex';
+  body.style.flexDirection = 'column';
+  body.style.gap = '10px';
+  body.style.padding = '12px';
+
+  // 返回选择联系人的按钮（如果有多个联系人）
+  const contacts = appData.users.filter(u => !u.members);
+  if (contacts.length > 1) {
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn';
+    backBtn.style.cssText = 'display:flex;align-items:center;gap:4px;margin-bottom:8px;';
+    backBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('undo')}</svg> 重新选择`;
+    backBtn.onclick = () => { renderDatingPage(); };
+    body.appendChild(backBtn);
+  }
+
+  const item = document.createElement('div');
+  item.className = 'chat-item';
+  item.style.cssText = 'cursor:pointer;background:var(--secondary-bg);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;';
+  item.innerHTML = `
+        <div class="avatar" style="display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:var(--theme-light);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--theme)" stroke-width="2">
+                ${getIconSVG('grid')}
+            </svg>
+        </div>
+        <div class="info">
+            <div class="name">五子棋</div>
+            <div class="preview">经典五子棋，和梦角对弈</div>
+        </div>
+    `;
+  item.onclick = () => { openGomokuPage(userId); };
+  body.appendChild(item);
+}
+
+// ========== 五子棋游戏 ==========
+let gomokuGame = null;
+let gomokuCustomMessages = JSON.parse(localStorage.getItem('jxj_gomoku_msgs') || '["该你了", "快点呀", "下这里", "你好厉害", "再来一局"]');
+
+function openGomokuPage(userId) {
+    hideAllPages();
+    document.getElementById('gomokuPage').classList.add('active');
+    if (!gomokuGame) {
+        gomokuGame = new GomokuGame('gomokuPageContent', userId);
+    } else {
+        gomokuGame.userId = userId;
+        gomokuGame.reset();
+    }
+}
+
+class GomokuGame {
+    constructor(containerId, userId) {
+        this.container = document.getElementById(containerId);
+        this.userId = userId;
+        this.size = 9;
+        this.cellSize = 0;
+        this.padding = 20;
+        this.board = [];
+        this.currentPlayer = 'me';
+        this.gameOver = false;
+        this.meColor = 'black';
+        this.mjColor = 'white';
+        this.moveHistory = [];
+        this.timer = null;
+        this.lastMoveTime = 0;
+        this.forcedMove = false;
+        this.initUI();
+    }
+
+    initUI() {
+    this.container.innerHTML = '';
+    
+    const contact = getContact(this.userId);
+    
+    // 顶部信息栏（MJ）
+    const topBar = document.createElement('div');
+    topBar.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 12px;width:100%;max-width:400px;margin:0 auto;';
+    
+    const mjAvatar = document.createElement('div');
+    mjAvatar.className = 'gomoku-avatar';
+    mjAvatar.style.cssText = 'width:40px;height:40px;border-radius:50%;overflow:hidden;cursor:pointer;flex-shrink:0;';
+    if(contact && contact.avt){
+        mjAvatar.innerHTML = `<img src="${contact.avt}" style="width:100%;height:100%;object-fit:cover;">`;
+    } else {
+        mjAvatar.innerHTML = `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21c0-4.5 3-7 6.5-7s6.5 2.5 6.5 7"/></svg>`;
+    }
+    mjAvatar.title = '点击发送快捷消息';
+    mjAvatar.onclick = () => this.showQuickMsg('mj');
+    topBar.appendChild(mjAvatar);
+    
+    // MJ 棋子颜色指示
+    this.mjStoneIndicator = document.createElement('span');
+    this.mjStoneIndicator.style.cssText = 'width:20px;height:20px;border-radius:50%;flex-shrink:0;';
+    topBar.appendChild(this.mjStoneIndicator);
+    
+    // MJ 昵称
+    const mjName = document.createElement('span');
+    mjName.style.cssText = 'font-weight:bold;color:var(--text-primary);font-size:14px;';
+    mjName.textContent = contact ? contact.name : '梦角';
+    topBar.appendChild(mjName);
+    
+    // MJ 执棋文字
+    this.mjColorText = document.createElement('span');
+    this.mjColorText.style.cssText = 'font-size:12px;color:var(--text-secondary);';
+    topBar.appendChild(this.mjColorText);
+    
+    this.container.appendChild(topBar);
+    
+    // 棋盘区域
+    const boardContainer = document.createElement('div');
+    boardContainer.style.cssText = 'position:relative;display:flex;justify-content:center;width:100%;max-width:400px;margin:0 auto;';
+    this.canvas = document.createElement('canvas');
+    this.canvas.id = 'gomokuCanvas';
+    this.canvas.style.cssText = 'width:100%;max-width:360px;display:block;';
+    boardContainer.appendChild(this.canvas);
+    this.container.appendChild(boardContainer);
+    
+    // 底部信息栏（我）
+    const bottomBar = document.createElement('div');
+    bottomBar.style.cssText = 'display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:8px 12px;width:100%;max-width:400px;margin:0 auto;';
+    
+    // 我的执棋文字
+    this.meColorText = document.createElement('span');
+    this.meColorText.style.cssText = 'font-size:12px;color:var(--text-secondary);';
+    bottomBar.appendChild(this.meColorText);
+    
+    // 我的昵称
+    const meName = document.createElement('span');
+    meName.style.cssText = 'font-weight:bold;color:var(--text-primary);font-size:14px;';
+    meName.textContent = appData.myProfile.name;
+    bottomBar.appendChild(meName);
+    
+    // 我的棋子颜色指示
+    this.meStoneIndicator = document.createElement('span');
+    this.meStoneIndicator.style.cssText = 'width:20px;height:20px;border-radius:50%;flex-shrink:0;';
+    bottomBar.appendChild(this.meStoneIndicator);
+    
+    // 我的头像
+    const meAvatar = document.createElement('div');
+    meAvatar.className = 'gomoku-avatar';
+    meAvatar.style.cssText = 'width:40px;height:40px;border-radius:50%;overflow:hidden;cursor:pointer;flex-shrink:0;';
+    if(appData.myProfile.avt){
+        meAvatar.innerHTML = `<img src="${appData.myProfile.avt}" style="width:100%;height:100%;object-fit:cover;">`;
+    } else {
+        meAvatar.innerHTML = `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21c0-4.5 3-7 6.5-7s6.5 2.5 6.5 7"/></svg>`;
+    }
+    meAvatar.title = '点击发送快捷消息';
+    meAvatar.onclick = () => this.showQuickMsg('me');
+    bottomBar.appendChild(meAvatar);
+    
+    this.container.appendChild(bottomBar);
+    
+    // 状态和按钮
+    this.statusDiv = document.createElement('div');
+    this.statusDiv.className = 'gomoku-status';
+    this.statusDiv.textContent = '请选择棋子颜色';
+    this.container.appendChild(this.statusDiv);
+    
+    const btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px;';
+    
+    this.undoBtn = document.createElement('button');
+    this.undoBtn.className = 'gomoku-btn';
+    this.undoBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('undo')}</svg> 悔棋`;
+    this.undoBtn.onclick = () => this.requestUndo();
+    btnRow.appendChild(this.undoBtn);
+    
+    this.urgeBtn = document.createElement('button');
+    this.urgeBtn.className = 'gomoku-btn';
+    this.urgeBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('bell')}</svg> 催促`;
+    this.urgeBtn.onclick = () => this.urgeOpponent();
+    btnRow.appendChild(this.urgeBtn);
+    
+    this.msgBtn = document.createElement('button');
+    this.msgBtn.className = 'gomoku-btn';
+    this.msgBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('edit-3')}</svg> 消息`;
+    this.msgBtn.onclick = () => this.manageMessages();
+    btnRow.appendChild(this.msgBtn);
+    
+    this.resetBtn = document.createElement('button');
+    this.resetBtn.className = 'gomoku-btn';
+    this.resetBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${getIconSVG('refresh-cw')}</svg> 重来`;
+    this.resetBtn.onclick = () => this.reset();
+    btnRow.appendChild(this.resetBtn);
+    
+    this.container.appendChild(btnRow);
+    
+    this.bubbleLayer = document.createElement('div');
+    this.bubbleLayer.style.cssText = 'position:relative;width:100%;max-width:400px;margin:8px auto;min-height:30px;';
+    this.container.appendChild(this.bubbleLayer);
+    
+    // 绑定事件
+    this.canvas.addEventListener('click', (e) => this.handleClick(e));
+    window.addEventListener('resize', () => this.adjustCanvasSize());
+    
+    // 初始化指示器样式
+    this.updateStoneIndicators();
+    
+    this.resetBoard();
+    
+    setTimeout(() => {
+        this.adjustCanvasSize();
+        this.showColorSelect();
+    }, 100);
+}
+
+
+     updateStoneIndicators() {
+       if (this.meColor === 'black') {
+         this.meStoneIndicator.style.background = '#333';
+         this.meStoneIndicator.style.border = 'none';
+       } else {
+         this.meStoneIndicator.style.background = '#fff';
+         this.meStoneIndicator.style.border = '2px solid #333';
+       }
+       this.meColorText.textContent = this.meColor === 'black' ? '黑棋' : '白棋';
+     
+       if (this.mjColor === 'black') {
+         this.mjStoneIndicator.style.background = '#333';
+         this.mjStoneIndicator.style.border = 'none';
+       } else {
+         this.mjStoneIndicator.style.background = '#fff';
+         this.mjStoneIndicator.style.border = '2px solid #333';
+       }
+       this.mjColorText.textContent = this.mjColor === 'black' ? '黑棋' : '白棋';
+     }
+     showColorSelect() {
+  const overlay = document.createElement('div');
+  overlay.className = 'mask show';
+  const card = document.createElement('div');
+  card.className = 'pop-card';
+  card.style.width = '280px';
+  const header = document.createElement('div');
+  header.className = 'pop-header';
+  header.textContent = '选择棋子颜色';
+  card.appendChild(header);
+  const body = document.createElement('div');
+  body.className = 'pop-body';
+  body.style.cssText = 'display:flex;gap:10px;justify-content:center;';
+  const blackBtn = document.createElement('button');
+  blackBtn.className = 'btn-primary';
+  blackBtn.textContent = '黑棋（先手）';
+  blackBtn.onclick = () => {
+    overlay.remove();
+    this.meColor = 'black';
+    this.mjColor = 'white';
+    this.currentPlayer = 'me';
+    this.updateStoneIndicators(); // ← 新加
+    this.adjustCanvasSize();
+    this.startGame();
+  };
+  const whiteBtn = document.createElement('button');
+  whiteBtn.className = 'btn';
+  whiteBtn.textContent = '白棋（后手）';
+  whiteBtn.onclick = () => {
+    overlay.remove();
+    this.meColor = 'white';
+    this.mjColor = 'black';
+    this.currentPlayer = 'mj';
+    this.updateStoneIndicators(); // ← 新加
+    this.adjustCanvasSize();
+    this.startGame();
+  };
+  body.appendChild(blackBtn);
+  body.appendChild(whiteBtn);
+  card.appendChild(body);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+    startGame() {
+        this.statusDiv.textContent = this.currentPlayer === 'me' ? '轮到你落子了' : '梦角思考中...';
+        this.lastMoveTime = Date.now();
+        this.startTimer();
+        if (this.currentPlayer === 'mj') {
+            setTimeout(() => this.mjMove(), 600 + Math.random() * 1000);
+        }
+    }
+
+    startTimer() {
+        clearInterval(this.timer);
+        this.lastMoveTime = Date.now();
+        this.forcedMove = false;
+        this.timer = setInterval(() => {
+            const elapsed = (Date.now() - this.lastMoveTime) / 1000;
+            if (elapsed > 30 && !this.forcedMove && this.currentPlayer === 'mj') {
+                if (Math.random() < 0.3) {
+                    const msg = gomokuCustomMessages[Math.floor(Math.random() * gomokuCustomMessages.length)];
+                    this.showBubble('mj', msg);
+                }
+            }
+            if (elapsed > 60) {
+                this.forcedMove = true;
+                if (this.currentPlayer === 'me') {
+                    this.randomMove('me');
+                } else {
+                    this.randomMove('mj');
+                }
+            }
+        }, 1000);
+    }
+
+    randomMove(player) {
+        if (this.gameOver) return;
+        const empty = [];
+        for (let r = 0; r < this.size; r++) {
+            for (let c = 0; c < this.size; c++) {
+                if (!this.board[r][c]) empty.push({row: r, col: c});
+            }
+        }
+        if (empty.length > 0) {
+            const move = empty[Math.floor(Math.random() * empty.length)];
+            this.placeStone(move.row, move.col, player);
+        }
+    }
+
+    placeStone(row, col, player) {
+        this.board[row][col] = player;
+        this.moveHistory.push({row, col, player});
+        this.drawBoard();
+        clearInterval(this.timer);
+        this.forcedMove = false;
+        if (this.checkWin(row, col, player)) {
+            this.gameOver = true;
+            this.statusDiv.textContent = player === 'me' ? '🎉 你赢了！' : '梦角赢了';
+            return;
+        }
+        if (this.isBoardFull()) {
+            this.gameOver = true;
+            this.statusDiv.textContent = '平局';
+            return;
+        }
+        this.switchPlayer();
+    }
+
+    switchPlayer() {
+        this.currentPlayer = this.currentPlayer === 'me' ? 'mj' : 'me';
+        if (this.currentPlayer === 'me') {
+            this.statusDiv.textContent = '轮到你落子了';
+            this.startTimer();
+        } else {
+            this.statusDiv.textContent = '梦角思考中...';
+            this.startTimer();
+            setTimeout(() => this.mjMove(), 500 + Math.random() * 2000);
+        }
+    }
+
+    handleClick(e) {
+        if (this.gameOver || this.currentPlayer !== 'me') return;
+        const rect = this.canvas.getBoundingClientRect();
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+        const col = Math.round((x - this.padding) / this.cellSize);
+        const row = Math.round((y - this.padding) / this.cellSize);
+        if (row < 0 || row >= this.size || col < 0 || col >= this.size) return;
+        if (this.board[row][col] !== null) return;
+        this.placeStone(row, col, 'me');
+    }
+
+    mjMove() {
+        if (this.gameOver) return;
+        const move = this.getAIMove();
+        if (move) {
+            this.placeStone(move.row, move.col, 'mj');
+        } else {
+            // 理论上不会到这里，但万一没有空位则随机走
+            this.randomMove('mj');
+        }
+    }
+
+    getAIMove() {
+        const winMove = this.findWinningMove('mj');
+        if (winMove) return winMove;
+        const blockMove = this.findWinningMove('me');
+        if (blockMove) return blockMove;
+        const empty = [];
+        for (let r = 0; r < this.size; r++) {
+            for (let c = 0; c < this.size; c++) {
+                if (!this.board[r][c]) empty.push({row: r, col: c, score: Math.random()});
+            }
+        }
+        if (empty.length === 0) return null;
+        empty.sort((a, b) => {
+            const distA = Math.abs(a.row - 4) + Math.abs(a.col - 4);
+            const distB = Math.abs(b.row - 4) + Math.abs(b.col - 4);
+            return distA - distB + (Math.random() - 0.5) * 2;
+        });
+        return empty[0];
+    }
+
+    findWinningMove(player) {
+        for (let r = 0; r < this.size; r++) {
+            for (let c = 0; c < this.size; c++) {
+                if (this.board[r][c] === null) {
+                    this.board[r][c] = player;
+                    if (this.checkWin(r, c, player)) {
+                        this.board[r][c] = null;
+                        return {row: r, col: c};
+                    }
+                    this.board[r][c] = null;
+                }
+            }
+        }
+        return null;
+    }
+
+    requestUndo() {
+        if (this.gameOver) return;
+        if (this.currentPlayer !== 'me') {
+            toast('现在不是你悔棋的时候');
+            return;
+        }
+        if (this.moveHistory.length < 1) {
+            toast('无棋可悔');
+            return;
+        }
+        const agree = Math.random() < 0.5;
+        if (agree) {
+            for (let i = 0; i < 2; i++) {
+                if (this.moveHistory.length > 0) {
+                    const last = this.moveHistory.pop();
+                    this.board[last.row][last.col] = null;
+                }
+            }
+            this.drawBoard();
+            this.currentPlayer = 'me';
+            this.statusDiv.textContent = '梦角同意悔棋，轮到你落子了';
+            this.startTimer();
+            toast('梦角同意悔棋');
+        } else {
+            toast('梦角不同意悔棋');
+            this.showBubble('mj', '我不想悔棋');
+        }
+    }
+
+    urgeOpponent() {
+        if (this.gameOver) return;
+        if (this.currentPlayer !== 'mj') {
+            toast('现在是你自己的回合');
+            return;
+        }
+        const msg = gomokuCustomMessages[Math.floor(Math.random() * gomokuCustomMessages.length)];
+        this.showBubble('me', msg);
+        toast('已催促');
+    }
+
+    showQuickMsg(who) {
+        const msgs = gomokuCustomMessages;
+        const overlay = document.createElement('div');
+        overlay.className = 'mask show';
+        const card = document.createElement('div');
+        card.className = 'pop-card';
+        card.style.width = '250px';
+        const header = document.createElement('div');
+        header.className = 'pop-header';
+        header.textContent = '快捷消息';
+        card.appendChild(header);
+        const body = document.createElement('div');
+        body.className = 'pop-body';
+        body.style.maxHeight = '200px';
+        body.style.overflowY = 'auto';
+        msgs.forEach(msg => {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.style.cssText = 'width:100%;text-align:left;margin-bottom:4px;';
+            btn.textContent = msg;
+            btn.onclick = () => {
+                overlay.remove();
+                this.showBubble(who, msg);
+            };
+            body.appendChild(btn);
+        });
+        card.appendChild(body);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove(); });
+    }
+
+    showBubble(who, msg) {
+        const bubble = document.createElement('div');
+        bubble.style.cssText = `max-width:70%;padding:6px 10px;border-radius:12px;font-size:13px;margin:4px 0;word-break:break-word;animation: fadeInOut 3s forwards;`;
+        if (who === 'me') {
+            bubble.style.cssText += 'margin-left:auto;background:var(--bubble-sent);color:#fff;border-top-right-radius:2px;';
+        } else {
+            bubble.style.cssText += 'margin-right:auto;background:var(--bubble-recv);border:1px solid var(--bubble-recv-border);border-top-left-radius:2px;';
+        }
+        bubble.textContent = msg;
+        this.bubbleLayer.appendChild(bubble);
+        setTimeout(() => { if(bubble.parentNode) bubble.remove(); }, 3000);
+    }
+
+    manageMessages() {
+        const overlay = document.createElement('div');
+        overlay.className = 'mask show';
+        const card = document.createElement('div');
+        card.className = 'pop-card';
+        card.style.width = '300px';
+        const header = document.createElement('div');
+        header.className = 'pop-header';
+        header.textContent = '管理快捷消息';
+        card.appendChild(header);
+        const body = document.createElement('div');
+        body.className = 'pop-body';
+        body.style.maxHeight = '300px';
+        body.style.overflowY = 'auto';
+        
+        const inputRow = document.createElement('div');
+        inputRow.style.cssText = 'display:flex;gap:6px;margin-bottom:8px;';
+        const input = document.createElement('input');
+        input.placeholder = '添加新消息';
+        input.style.cssText = 'flex:1;padding:4px 8px;border-radius:8px;border:1px solid var(--border-light);';
+        const addBtn = document.createElement('button');
+        addBtn.className = 'btn-primary';
+        addBtn.textContent = '添加';
+        addBtn.onclick = () => {
+            const val = input.value.trim();
+            if (val && !gomokuCustomMessages.includes(val)) {
+                gomokuCustomMessages.push(val);
+                localStorage.setItem('jxj_gomoku_msgs', JSON.stringify(gomokuCustomMessages));
+                overlay.remove();
+                this.manageMessages();
+            }
+        };
+        inputRow.appendChild(input);
+        inputRow.appendChild(addBtn);
+        body.appendChild(inputRow);
+        
+        gomokuCustomMessages.forEach((msg, idx) => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border-light);';
+            row.textContent = msg;
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn';
+            delBtn.style.cssText = 'color:#f44336;font-size:12px;';
+            delBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f44336" stroke-width="2">${getIconSVG('trash-2')}</svg>`;
+            delBtn.onclick = () => {
+                gomokuCustomMessages.splice(idx, 1);
+                localStorage.setItem('jxj_gomoku_msgs', JSON.stringify(gomokuCustomMessages));
+                overlay.remove();
+                this.manageMessages();
+            };
+            row.appendChild(delBtn);
+            body.appendChild(row);
+        });
+        card.appendChild(body);
+        const footer = document.createElement('div');
+        footer.className = 'pop-footer';
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'btn';
+        closeBtn.textContent = '关闭';
+        closeBtn.onclick = () => overlay.remove();
+        footer.appendChild(closeBtn);
+        card.appendChild(footer);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove(); });
+    }
+
+    adjustCanvasSize() {
+        const containerWidth = this.container.clientWidth - 32;
+        const maxWidth = 360;
+        const width = Math.min(containerWidth, maxWidth);
+        if (width <= 0) return;
+        this.canvas.width = width;
+        this.canvas.height = width;
+        this.cellSize = (width - this.padding * 2) / (this.size - 1);
+        this.drawBoard();
+    }
+
+    resetBoard() {
+        this.board = Array(this.size).fill().map(() => Array(this.size).fill(null));
+        this.moveHistory = [];
+        this.gameOver = false;
+        clearInterval(this.timer);
+        this.drawBoard();
+    }
+
+    reset() {
+        this.resetBoard();
+        setTimeout(() => {
+            this.adjustCanvasSize();
+            this.showColorSelect();
+        }, 100);
+    }
+
+    drawBoard() {
+        const ctx = this.canvas.getContext('2d');
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-bg').trim() || '#f5f3f0';
+        ctx.fillRect(0, 0, w, h);
+        // 网格线
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim() || '#e9eef3';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < this.size; i++) {
+            const pos = this.padding + i * this.cellSize;
+            ctx.beginPath();
+            ctx.moveTo(this.padding, pos);
+            ctx.lineTo(w - this.padding, pos);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos, this.padding);
+            ctx.lineTo(pos, h - this.padding);
+            ctx.stroke();
+        }
+        // 星位
+        const starPoints = [[4,4], [2,2], [2,6], [6,2], [6,6]];
+        const dotRadius = this.cellSize * 0.08;
+        ctx.fillStyle = '#6c7a89';
+        starPoints.forEach(([r, c]) => {
+            const x = this.padding + c * this.cellSize;
+            const y = this.padding + r * this.cellSize;
+            ctx.beginPath();
+            ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        // 棋子
+        for (let r = 0; r < this.size; r++) {
+            for (let c = 0; c < this.size; c++) {
+                if (this.board[r][c]) {
+                    const x = this.padding + c * this.cellSize;
+                    const y = this.padding + r * this.cellSize;
+                    const radius = this.cellSize * 0.4;
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    if (this.board[r][c] === 'me') {
+                        if (this.meColor === 'black') {
+                            ctx.fillStyle = '#333';
+                            ctx.fill();
+                        } else {
+                            ctx.fillStyle = '#fff';
+                            ctx.fill();
+                            ctx.strokeStyle = '#333';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                        }
+                    } else {
+                        if (this.mjColor === 'black') {
+                            ctx.fillStyle = '#333';
+                            ctx.fill();
+                        } else {
+                            ctx.fillStyle = '#fff';
+                            ctx.fill();
+                            ctx.strokeStyle = '#333';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    checkWin(row, col, player) {
+        const directions = [[0,1],[1,0],[1,1],[1,-1]];
+        for (const [dx, dy] of directions) {
+            let count = 1;
+            for (let step = 1; step < 5; step++) {
+                const r = row + step * dx;
+                const c = col + step * dy;
+                if (r >= 0 && r < this.size && c >= 0 && c < this.size && this.board[r][c] === player) count++;
+                else break;
+            }
+            for (let step = 1; step < 5; step++) {
+                const r = row - step * dx;
+                const c = col - step * dy;
+                if (r >= 0 && r < this.size && c >= 0 && c < this.size && this.board[r][c] === player) count++;
+                else break;
+            }
+            if (count >= 5) return true;
+        }
+        return false;
+    }
+
+    isBoardFull() {
+        for (let r = 0; r < this.size; r++) {
+            for (let c = 0; c < this.size; c++) {
+                if (this.board[r][c] === null) return false;
+            }
+        }
+        return true;
+    }
+}
     // ========== 陪伴系统（自定义间隔、日历高亮、统计精确到秒） ==========
     function openCompanionPage(){ hideAllPages(); document.getElementById('companionPage').classList.add('active'); document.getElementById('companionTitle').textContent = '陪伴系统'; renderCompanionPage(); }
     function switchToCompanionActivePage(task) {
@@ -7620,7 +8457,8 @@ document.addEventListener('visibilitychange', () => {
     function toggleSecondRow() { toolsBar2Collapsed = !toolsBar2Collapsed; const bar2 = document.getElementById('toolsRow2'); if(bar2) bar2.style.display = toolsBar2Collapsed ? 'none' : 'flex'; }
 
     // ========== 页面导航 ==========
-    function hideAllPages() { const pages = ['chatsPage','chatPage','contactsPage','contactDetailPage','discoverPage','momentsPage','mailboxPage','letterPage','mePage','pokePage','emojiManagerPage','blockedPage','globalCardsPage','userCardsPage','myBgPage','contactBgPage','searchPage','dateSearchPage','imageSearchPage','voiceSearchPage','musicSearchPage','musicPage','companionPage','bookListPage','movieListPage','tarotPage','movieTogetherPage','bookSearchPage','movieSearchPage','voiceManagerPage','companionActivePage'];pages.forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); }); }
+    function hideAllPages() { const pages = ['chatsPage','chatPage','contactsPage','contactDetailPage','discoverPage','momentsPage','mailboxPage','letterPage','mePage','pokePage','emojiManagerPage','blockedPage','globalCardsPage','userCardsPage','myBgPage','contactBgPage','searchPage','dateSearchPage','imageSearchPage','voiceSearchPage','musicSearchPage','musicPage','companionPage','bookListPage','movieListPage','tarotPage','movieTogetherPage','bookSearchPage','movieSearchPage','voiceManagerPage','companionActivePage'
+    ,'datingPage','gomokuPage'];pages.forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('active'); }); }
     function setActiveNav(navName) {
       // 遍历所有页面里的所有导航项，全部清除状态
       document.querySelectorAll('.page .nav-item').forEach(n => {
@@ -7843,6 +8681,7 @@ document.addEventListener('visibilitychange', () => {
         document.getElementById('goMovieListsBtn').onclick = () => { openMovieListPage(); };
         document.getElementById('goTarotBtn').onclick = () => { openTarotPage(); };
         document.getElementById('goMovieTogetherBtn').onclick = () => { openMovieTogetherPage(); };
+        document.getElementById('goDatingBtn').onclick = () => { openDatingPage(); };
         document.getElementById('letterBackBtn').onclick = () => { if(letterRefreshInterval) clearInterval(letterRefreshInterval); autoSaveDraft(currentChatId, true); document.getElementById('letterPage').classList.remove('active'); openMailboxPage(); };
         document.getElementById('momentsBackBtn').onclick = () => { document.getElementById('momentsPage').classList.remove('active'); if(_momentsFromContactDetail && currentChatId && currentChatId !== 'me'){ document.getElementById('contactDetailPage').classList.add('active'); renderContactDetail(currentChatId); _momentsFromContactDetail = false; } else if(_momentsFromChat && currentChatId && currentChatId !== 'me'){ document.getElementById('chatPage').classList.add('active'); } else { switchToChatsTab(); } };
         document.getElementById('momentsPublishBtn').onclick = showMomentPublish;
@@ -7851,6 +8690,8 @@ document.addEventListener('visibilitychange', () => {
         document.getElementById('companionBackBtn').onclick = () => { clearCompanionTimers(); document.getElementById('companionPage').classList.remove('active'); switchToDiscoverTab(); };
         document.getElementById('bookListBackBtn').onclick = () => { document.getElementById('bookListPage').classList.remove('active'); switchToDiscoverTab(); };
         document.getElementById('movieListBackBtn').onclick = () => { document.getElementById('movieListPage').classList.remove('active'); switchToDiscoverTab(); };
+        document.getElementById('datingBackBtn').onclick = () => { document.getElementById('datingPage').classList.remove('active'); switchToDiscoverTab(); };
+        document.getElementById('gomokuBackBtn').onclick = () => { document.getElementById('gomokuPage').classList.remove('active'); document.getElementById('datingPage').classList.add('active'); renderDatingPage(); };
     }
 
     // ========== 模拟朋友圈数据 ==========
