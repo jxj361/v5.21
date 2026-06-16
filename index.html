@@ -1865,11 +1865,34 @@ function renderQuotePreview(){ const container = document.getElementById('quoteP
 function renderMessages() {
   const c = document.getElementById('chatMessages');
   while (c.firstChild) c.removeChild(c.firstChild);
-  (appData.msg[currentChatId] || []).forEach(m => appendMessageToChat(m));
-  ensureChatOverlay();
-  c.scrollTop = c.scrollHeight;
-  // 二次保险：等图片和语音渲染完再滚一次
-  setTimeout(() => { c.scrollTop = c.scrollHeight; }, 150);
+
+  const msgs = appData.msg[currentChatId] || [];
+  const batchSize = 10; // 每批渲染 10 条消息
+  let index = 0;
+
+  function renderBatch() {
+    const batchEnd = Math.min(index + batchSize, msgs.length);
+    for (let i = index; i < batchEnd; i++) {
+      appendMessageToChat(msgs[i]);
+    }
+    index = batchEnd;
+
+    if (index < msgs.length) {
+      // 还有更多消息，等浏览器空闲时继续渲染
+      setTimeout(() => renderBatch(), 10);
+    } else {
+      // 全部渲染完成，滚到底部
+      ensureChatOverlay();
+      c.scrollTop = c.scrollHeight;
+      setTimeout(() => { c.scrollTop = c.scrollHeight; }, 150);
+    }
+  }
+
+  if (msgs.length > 0) {
+    renderBatch();
+  } else {
+    ensureChatOverlay();
+  }
 }
 
 function renderEmojiPanel(){ 
