@@ -1137,6 +1137,7 @@ async function load() {
     if (appData.companionBgSlideshow === undefined) appData.companionBgSlideshow = false;
     if (!appData.companionBgSlideshowInterval) appData.companionBgSlideshowInterval = 30;
     if (!appData.themeColor) appData.themeColor = '#c5a47e';
+    if (appData.autoTrimEnabled === undefined) appData.autoTrimEnabled = false;
     for (const uid in appData.letters) {
         (appData.letters[uid] || []).forEach(l => {
             if (l.from !== 'me' && l.read === undefined) l.read = false;
@@ -1154,7 +1155,11 @@ if(appData.dailyCallCountDate !== todayStr){
 }
 appData.dataChanged = false;
 appData.lastBackupTime = Date.now();   // 确保刚加载完的状态干净
-   
+setTimeout(() => {
+  if (appData.autoTrimEnabled === true) {
+    autoTrimChatData(20);
+  }
+}, 1000);   
 }
 
 function getContact(id){ return id==='me'?appData.myProfile:(appData.users.find(u=>u.id===id)||appData.groups.find(g=>g.id===id)); }
@@ -2729,6 +2734,22 @@ try { localStorage.removeItem('jxj_theme_backup'); } catch (e) {}
 try { localStorage.removeItem('jxj_gomoku_msgs'); } catch (e) {}
 applyTheme('#c5a47e');
 currentChatId = null; currentMomentUserId = 'me'; selectedCards.clear(); letterUndoStack = []; letterRedoStack = []; draftUndoStacks = {}; draftRedoStacks = {}; document.getElementById('chatsPage').classList.add('active'); document.getElementById('chatPage').classList.remove('active'); document.getElementById('contactsPage').classList.remove('active'); document.getElementById('contactDetailPage').classList.remove('active'); document.getElementById('discoverPage').classList.remove('active'); document.getElementById('momentsPage').classList.remove('active'); document.getElementById('mePage').classList.remove('active'); document.getElementById('mailboxPage').classList.remove('active'); document.getElementById('letterPage').classList.remove('active'); document.getElementById('globalMask').classList.remove('show'); renderChatList(); renderContactList(); toast('数据已重置'); }); };
+// 自动清理聊天记录开关（红色）
+const autoTrimBtn = document.createElement('button');
+autoTrimBtn.className = 'btn';
+autoTrimBtn.style.cssText = 'width:90%;margin:2px auto;display:flex;align-items:center;text-align:left;color:#f44336;';
+const updateAutoTrimBtn = () => {
+    const enabled = appData.autoTrimEnabled === true;
+    autoTrimBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f44336" stroke-width="2" style="margin-right:6px;flex-shrink:0;">${getIconSVG('trash-2')}</svg>自动清理聊天记录: ` + (enabled ? '开' : '关');
+};
+updateAutoTrimBtn();
+autoTrimBtn.onclick = () => {
+    appData.autoTrimEnabled = appData.autoTrimEnabled === true ? false : true;
+    markDataChanged(); save();
+    updateAutoTrimBtn();
+    toast(appData.autoTrimEnabled ? '已开启自动清理（数据超过20MB时清理最旧记录）' : '已关闭自动清理');
+};
+container.appendChild(autoTrimBtn);
 container.appendChild(resetBtn);
 }
 // 联系人单独导出
