@@ -2135,7 +2135,9 @@ function openChat(){
         const announceEl = document.getElementById('groupAnnouncement');
         if (announceEl) announceEl.style.display = 'none';
     }
-    renderMessages();renderEmojiPanel();renderImagePanel();
+    // 延迟渲染消息，让浏览器先完成其他 DOM 更新
+setTimeout(() => renderMessages(), 50);
+renderEmojiPanel();renderImagePanel();
     document.getElementById('chatPage').classList.add('active');
     document.getElementById('chatsPage').classList.remove('active');
     document.getElementById('messageInput').innerHTML = '';
