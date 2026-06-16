@@ -2678,9 +2678,10 @@ resetBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none
 resetBtn.onclick = () => { showConfirm('重置所有数据？', ()=>{ indexedDB.deleteDatabase(DB_NAME); appData = { globalCardGroups: JSON.parse(JSON.stringify(DEFAULT_CARDS)), globalRule: { min:30, max:60, cntMin:3, cntMax:5, combineMin: 1, combineMax: 3 }, myProfile: { id:'me', name:'我', avt:'', signature:'', status:'在线' }, users: [], groups: [], userEmo: {}, userImages: {}, globalEmojis: [], msg: {}, moments: {}, letters: {}, letterDrafts: {}, momentsBg: '', hiddenGlobalEmojis: {}, userDailyCommentCount: {}, disabledGlobalCards: [], disabledUserCards: {}, quoteHistory: {}, blockedKeywords: [], userBgs: {}, momentsBgs: {}, lastUserMsgTime: {}, userSoundSettings: {}, autoBackupEnabled: true, autoBackupIntervalSecs: 60, soundVolume: 0.5, dataChanged: false, lastBackupTime: Date.now(), hiddenChats: [], musicPlaylists: [{ name: "默认歌单", songs: [] }], bookLists: [{ name: "默认书单", books: [] }], movieLists: [{ name: "默认电影列表", movies: [] }], companionTasks: [], tarotCards: { tarot: [...BUILTIN_TAROT], lenormand: [...BUILTIN_LENORMAND] }, userVoices: {}, unreadBadgeSettings: {}, themeColor: '#c5a47e' }; appData.users.push({id:'u1',name:'梦角1',avt:'',bg:'',status:'在线',cardGroups:[{name:'未分组',list:[]}],rule:{min:30,max:60,cntMin:3,cntMax:5},noReply:false,noDisturb:true,allowInitiative:true,soundEnabled:true,replyTime:86400,muted:false},{id:'u2',name:'梦角2',avt:'',bg:'',status:'忙碌',cardGroups:[{name:'未分组',list:[]}],rule:{min:30,max:60,cntMin:3,cntMax:5},noReply:false,noDisturb:true,allowInitiative:true,soundEnabled:true,replyTime:86400,muted:false}); save(); 
 
 // 清除主题色备份并应用默认主题
-try { localStorage.removeItem('jxj_theme_backup'); } catch(e) {}
+try { localStorage.removeItem('jxj_theme_backup'); } catch (e) {}
+// 清除小游戏数据
+try { localStorage.removeItem('jxj_gomoku_msgs'); } catch (e) {}
 applyTheme('#c5a47e');
-
 currentChatId = null; currentMomentUserId = 'me'; selectedCards.clear(); letterUndoStack = []; letterRedoStack = []; draftUndoStacks = {}; draftRedoStacks = {}; document.getElementById('chatsPage').classList.add('active'); document.getElementById('chatPage').classList.remove('active'); document.getElementById('contactsPage').classList.remove('active'); document.getElementById('contactDetailPage').classList.remove('active'); document.getElementById('discoverPage').classList.remove('active'); document.getElementById('momentsPage').classList.remove('active'); document.getElementById('mePage').classList.remove('active'); document.getElementById('mailboxPage').classList.remove('active'); document.getElementById('letterPage').classList.remove('active'); document.getElementById('globalMask').classList.remove('show'); renderChatList(); renderContactList(); toast('数据已重置'); }); };
 container.appendChild(resetBtn);
 }
@@ -4522,7 +4523,10 @@ document.getElementById('restoreFileInput').onchange = async function(e){
             deepCleanAllCards();
             markDataChanged(); save();
             // ... 原有的后续处理，保持不动 ...
-            toast('导入成功');
+          // 同步更新主题色备份
+          try { localStorage.setItem('jxj_theme_backup', appData.themeColor); } catch (e) {}
+          applyTheme(appData.themeColor || '#c5a47e');
+          toast('导入成功');
         });
 
     } catch(err) {
